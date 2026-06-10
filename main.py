@@ -12,13 +12,17 @@ from typing import List
 
 models.Base.metadata.create_all(engine)
 
+# tags feature to saperate route
+user_tag="User"
+blog_tag="Blog"
+
 
 app=FastAPI()
 
 
 # blog create
 
-@app.post("/blog/",status_code=status.HTTP_201_CREATED)
+@app.post("/blog/",status_code=status.HTTP_201_CREATED,tags=[blog_tag])
 def create_blog(request:BlogSchema,db:Session=Depends(get_db)):
     new_blog=models.BlogModel(title=request.title,content=request.content)
     db.add(new_blog)
@@ -30,7 +34,7 @@ def create_blog(request:BlogSchema,db:Session=Depends(get_db)):
 
 # read all blogs
 
-@app.get("/blog/",status_code=status.HTTP_200_OK,response_model=List[BlogResponseSchema])
+@app.get("/blog/",status_code=status.HTTP_200_OK,response_model=List[BlogResponseSchema],tags=[blog_tag])
 def get_blogs_all(db:Session=Depends(get_db)):
     blogs=db.query(models.BlogModel).all()
     if not blogs:
@@ -40,7 +44,7 @@ def get_blogs_all(db:Session=Depends(get_db)):
 
 # read single blog
 
-@app.get("/blog/{id}/",status_code=status.HTTP_200_OK,response_model=BlogResponseSchema)
+@app.get("/blog/{id}/",status_code=status.HTTP_200_OK,response_model=BlogResponseSchema,tags=[blog_tag])
 def get_single_blog(id:int,res:Response,db:Session=Depends(get_db)):
     blog=db.query(models.BlogModel).filter(BlogModel.id==id).first()
 
@@ -51,7 +55,7 @@ def get_single_blog(id:int,res:Response,db:Session=Depends(get_db)):
 
 # update blog
 
-@app.put("/blog/{id}",status_code=status.HTTP_202_ACCEPTED)
+@app.put("/blog/{id}",status_code=status.HTTP_202_ACCEPTED,tags=[blog_tag])
 def update_blog(id:int,request:BlogSchema,db:Session=Depends(get_db)):
    data=request.model_dump()
 #    call database and get user
@@ -69,7 +73,7 @@ def update_blog(id:int,request:BlogSchema,db:Session=Depends(get_db)):
 
 # delete blog
 
-@app.delete("/blog/{id}",status_code=status.HTTP_204_NO_CONTENT)
+@app.delete("/blog/{id}",status_code=status.HTTP_204_NO_CONTENT,tags=[blog_tag])
 def delete_blog(id:int,db:Session=Depends(get_db)):
    blog=db.query(BlogModel).filter(BlogModel.id==id).first()
    if not blog:
@@ -86,7 +90,7 @@ def delete_blog(id:int,db:Session=Depends(get_db)):
 
 # user create
 
-@app.post("/users/",status_code=status.HTTP_201_CREATED)
+@app.post("/users/",status_code=status.HTTP_201_CREATED,tags=[user_tag])
 def create_user(request:UserSchema,db:Session=Depends(get_db)):
 
     # data=request.model_dump()
@@ -109,7 +113,7 @@ def create_user(request:UserSchema,db:Session=Depends(get_db)):
     
 # get current user
 
-@app.get("/users/{id}",response_model=UserResponseSchema)
+@app.get("/users/{id}",response_model=UserResponseSchema,tags=[user_tag])
 def get_single_user(id:int,db:Session=Depends(get_db)):
     user=db.query(UserModel).filter(UserModel.id==id).first()
     if not user:
@@ -120,7 +124,7 @@ def get_single_user(id:int,db:Session=Depends(get_db)):
 
 # delete user
 
-@app.delete("/users/{id}",status_code=status.HTTP_200_OK)
+@app.delete("/users/{id}",status_code=status.HTTP_200_OK,tags=[user_tag])
 def dlete_user(id:int,db:Session=Depends(get_db)):
     user=db.query(UserModel).filter(UserModel.id==id).delete(synchronize_session=False)
     db.commit()
