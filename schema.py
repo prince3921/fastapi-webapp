@@ -8,4 +8,19 @@ class BlogSchema(BaseModel):
 class BlogResponseSchema(BlogSchema):
 
     class Config():
-        orm_mode = True
+        from_attributes = True
+
+
+
+class UserSchema(BaseModel):
+    username:str
+    email:str
+    password:str
+
+
+class UserResponseSchema(UserSchema):
+    username:str
+    email:str
+
+    class Config():
+        from_attributes = True
