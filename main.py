@@ -1,11 +1,11 @@
 from fastapi import FastAPI,Depends,HTTPException,status,Response
-from schema import BlogSchema
+from schema import BlogSchema,BlogResponseSchema
 import models
 from models import BlogModel
 from database import engine
 from sqlalchemy.orm import Session
 from database import get_db
-
+from typing import List
 
 
 
@@ -29,7 +29,7 @@ def create_blog(request:BlogSchema,db:Session=Depends(get_db)):
 
 
 
-@app.get("/blog/",status_code=status.HTTP_200_OK)
+@app.get("/blog/",status_code=status.HTTP_200_OK,response_model=List[BlogResponseSchema])
 def get_blogs_all(db:Session=Depends(get_db)):
     blogs=db.query(models.BlogModel).all()
     if not blogs:
@@ -39,7 +39,7 @@ def get_blogs_all(db:Session=Depends(get_db)):
 
 
 
-@app.get("/blog/{id}/",status_code=status.HTTP_200_OK)
+@app.get("/blog/{id}/",status_code=status.HTTP_200_OK,response_model=BlogResponseSchema)
 def get_single_blog(id:int,res:Response,db:Session=Depends(get_db)):
     blog=db.query(models.BlogModel).filter(BlogModel.id==id).first()
 
@@ -53,12 +53,12 @@ def update_blog(id:int,request:BlogSchema,db:Session=Depends(get_db)):
    data=request.model_dump()
 #    call database and get user
    blog= db.query(models.BlogModel).filter(models.BlogModel.id==id).first()
-   db.commit()
 #  user not found
    if not blog:
        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail=f"Not Update with id {id} Successfully")
    if blog:
     blog.update(data)
+    db.commit()
     raise HTTPException(status_code=status.HTTP_202_ACCEPTED,detail={
         "status":"update successfully",
         "data":data
@@ -69,11 +69,11 @@ def update_blog(id:int,request:BlogSchema,db:Session=Depends(get_db)):
 @app.delete("/blog/{id}",status_code=status.HTTP_204_NO_CONTENT)
 def delete_blog(id:int,db:Session=Depends(get_db)):
    blog=db.query(BlogModel).filter(BlogModel.id==id).first()
-   db.commit()
    if not blog:
        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Content not found for delete")
    if blog:
        blog.delete(synchronize_session=False)
+       db.commit()
        raise HTTPException(status_code=status.HTTP_200_OK,detail=f"Delete Successfully id of {id}")
 
 
