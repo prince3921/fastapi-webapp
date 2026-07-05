@@ -4,6 +4,10 @@ from sqlalchemy.orm import relationship
 
 
 
+# in process for relationship with models
+
+
+
 class BlogModel(Base):
     __tablename__="blogs"
 
@@ -11,9 +15,8 @@ class BlogModel(Base):
     id=Column(Integer,primary_key=True,index=True)
     title=Column(String)
     content=Column(String)
-    user_id=Column(Integer,ForeignKey("users.id"))
+    user_id=Column(Integer,ForeignKey("users.id",ondelete="CASCADE"))
 
-    user=relationship("UserModel",back_populates="blogs")
 
 
 
@@ -26,7 +29,8 @@ class UserModel(Base):
     username=Column(String)
     email=Column(String)
     password=Column(String)
+    is_validate=Column(Boolean,default=False)
     isActive=Column(Boolean,default=False)
+    
 
-    blogs=relationship("BlogModel",back_populates="user")
 
